@@ -245,11 +245,15 @@ private:
 		std::vector<std::set<uint32_t> >tmp(procs);
 		std::set<uint32_t> tmp2;
 		std::set<uint32_t>::const_iterator it;
+		long t;
 		
 		key_vec = nv_matrix_alloc(NV_KEYPOINT_KEYPOINT_N, KEYPOINT_M);
 		desc_vec = nv_matrix_alloc(NV_KEYPOINT_DESC_N, KEYPOINT_M);
 		
+		t = nv_clock();
 		desc_m = nv_keypoint_ex(m_ctx, key_vec, desc_vec, smooth, 0);
+		printf("feature: keypoint_ex:  %ldms\n", nv_clock() - t);
+		t = nv_clock();
 		
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(procs) schedule(dynamic, 1)
@@ -273,6 +277,7 @@ private:
 			tmp2.insert(tmp[i].begin(), tmp[i].end());
 		}
 		std::copy(tmp2.begin(), tmp2.end(), std::back_inserter(vec));
+		printf("feature: assign label:  %ldms\n", nv_clock() - t);
 		
 		nv_matrix_free(&desc_vec);
 		nv_matrix_free(&key_vec);
@@ -437,6 +442,7 @@ public:
 			const nv_matrix_t *image)
 	{
 		nv_matrix_t *resize, *gray, *smooth;
+		long t;
 		
 		vec.clear();
 		
@@ -453,9 +459,12 @@ public:
 		gray = nv_matrix3d_alloc(1, resize->rows, resize->cols);
 		smooth = nv_matrix3d_alloc(1, resize->rows, resize->cols);
 		
+		t = nv_clock();
 		nv_resize(resize, image);
 		nv_gray(gray, resize);
 		nv_gaussian5x5(smooth, 0, gray, 0);
+		printf("feature: preprocess:  %ldms\n", nv_clock() - t);
+
 		extract_sparse_feature(vec, smooth);
 		
 		nv_matrix_free(&resize);
