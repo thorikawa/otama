@@ -460,6 +460,8 @@ otama_status_t
 InvertedIndexLevelDB::search(otama_result_t **results, int n,
 							 const sparse_vec_t &vec)
 {
+	OTAMA_LOG_DEBUG("# of features: %zd", vec.size());
+
 	int l, result_max, i;
 	long t;
 	int num_threads  = nv_omp_procs();
@@ -543,6 +545,7 @@ InvertedIndexLevelDB::search(otama_result_t **results, int n,
 			tmp.w = w;
 			hit_tmp.push_back(tmp);
 		}
+		OTAMA_LOG_DEBUG("filter by threshold: %zd", hit_tmp.size());
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(num_threads) shared(has_error) schedule(dynamic, 16)
 #endif

@@ -586,7 +586,9 @@ namespace otama
 			T *fv = this->feature_new();
 			bool has_id, has_feature, exist;
 			otama_status_t ret;
-			
+			long t;
+
+			t = nv_clock();
 			if (!OTAMA_VARIANT_IS_HASH(query)) {
 				feature_free(fv);
 				return OTAMA_STATUS_INVALID_ARGUMENTS;
@@ -606,6 +608,7 @@ namespace otama
 				feature_free(fv);
 				return OTAMA_STATUS_INVALID_ARGUMENTS;
 			}
+			OTAMA_LOG_DEBUG("extract feature:  %ldms", nv_clock() - t);
 			ret = feature_search(results, n, fv, query);
 			feature_free(fv);
 			
